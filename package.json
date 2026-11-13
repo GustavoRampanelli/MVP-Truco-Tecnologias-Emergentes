@@ -1,0 +1,13 @@
+{
+  "name": "truco-argentino-roguelike",
+  "version": "1.0.0",
+  "description": "Jogo de Truco Argentino estilo Roguelike Deckbuilder para Web",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/test_core.js",
+    "dev": "vite --port 3000 --open",
+    "serve": "python -m http.server 3000"
+  }
+}
+

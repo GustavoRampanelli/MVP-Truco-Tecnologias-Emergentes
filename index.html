@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truco Argentino: Deckbuilder de Boteco (PoC)</title>
+  <link rel="stylesheet" href="style.css?v=3d-pov-6">
+</head>
+<body>
+  <div id="app-container">
+
+    <!-- ====================================================================
+         1. TELA INICIAL (TITLE SCREEN)
+         ==================================================================== -->
+    <div id="title-screen" class="screen">
+      <div class="title-badge">🇦🇷 Prova de Conceito Roguelike</div>
+      <h1 class="game-main-title">TRUCO ARGENTINO</h1>
+      <h2 class="game-sub-title">O Deckbuilder de Boteco</h2>
+
+      <div class="title-art-container">
+        <!-- Amostras visuais das cartas da sprite -->
+        <div class="pixel-card" style="width: 114px; height: 152px;">
+          <div class="pixel-card-inner" style="width: 142px; height: 190px; transform: scale(0.8); transform-origin: top left; background-image: url('assets/8BitDeck_BaralhoEspanhol.png'); background-position: -0px -570px;"></div>
+        </div>
+        <div class="pixel-card" style="width: 114px; height: 152px;">
+          <div class="pixel-card-inner" style="width: 142px; height: 190px; transform: scale(0.8); transform-origin: top left; background-image: url('assets/8BitDeck_BaralhoEspanhol.png'); background-position: -0px -0px;"></div>
+        </div>
+        <div class="pixel-card" style="width: 114px; height: 152px;">
+          <div class="pixel-card-inner" style="width: 142px; height: 190px; transform: scale(0.8); transform-origin: top left; background-image: url('assets/8BitDeck_BaralhoEspanhol.png'); background-position: -852px -570px;"></div>
+        </div>
+      </div>
+
+      <div class="title-actions">
+        <button id="btn-start-run" class="pixel-btn btn-primary" style="font-size: 1.1rem; padding: 12px;">
+          ▶ Iniciar Nova Run
+        </button>
+        <button id="btn-open-rules" class="pixel-btn">
+          📖 Regras do Truco & Curingas
+        </button>
+        <button id="btn-title-fullscreen" class="pixel-btn" style="font-size: 0.95rem;">
+          ⛶ Alternar Tela Cheia
+        </button>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         2. TELA DA PARTIDA / MESA (GAME SCREEN)
+         ==================================================================== -->
+    <div id="game-screen" class="screen hidden">
+      <!-- Barra Superior Minimalista: Apenas o Botão de Menu no Canto Direito -->
+      <div class="top-bar-minimal">
+        <button id="btn-open-pause-menu" class="pixel-btn btn-menu-accent" title="Pausar / Menu de Configurações (Esc)">
+          ⏸️ MENU
+        </button>
+      </div>
+
+      <!-- Mesa do Boteco (Design POV inspirado em ref_oponente_cartas_truco.jpeg) -->
+      <div id="game-table" class="pov-battle-table">
+        <!-- Palco Superior: O Oponente Encarando o Jogador -->
+        <div class="battle-opponent-stage">
+          <!-- Placar Estilo Lousa de Sinuca (Chalkboard) -->
+          <div class="scoreboard-box chalkboard-scoreboard">
+            <div class="chalkboard-title">
+              DISPUTA A <span id="score-target-val">12</span> TENTOS
+            </div>
+            <div class="scoreboard-row">
+              <span class="chalk-label">Você:</span>
+              <span id="player-score-display" class="score-num">0</span>
+              <span id="player-tally" class="chalk-tally"></span>
+            </div>
+            <div class="scoreboard-row">
+              <span class="chalk-label">Oponente:</span>
+              <span id="opponent-score-display" class="score-num">0</span>
+              <span id="opponent-tally" class="chalk-tally"></span>
+            </div>
+          </div>
+
+          <!-- Personagem Central: O Oponente Encarando o Jogador -->
+          <div class="opponent-character-center">
+            <!-- Nome do Oponente (Em cima dele, conforme solicitado) -->
+            <div class="opponent-nameplate">
+              <span id="opponent-name">Pepe "El Novato"</span>
+              <span id="opponent-role" class="opponent-role-tag">Iniciante</span>
+            </div>
+
+            <div class="opponent-figure-frame">
+              <img id="opponent-character-img" src="assets/opponent_in_scene_clean.png" alt="Oponente" class="opponent-scene-img" />
+              <div id="opponent-speech-bubble" class="speech-bubble hidden">¡TRUCO!</div>
+            </div>
+
+            <!-- Ícones das cartas do inimigo (abaixo dele, como barra de vida) -->
+            <div id="opponent-hand" class="opp-life-cards-container">
+              <!-- Apenas ícones de cartas renderizados dinamicamente -->
+            </div>
+          </div>
+
+          <!-- Espaçador de Balanço Simétrico para Centralizar o Oponente -->
+          <div class="opponent-stage-spacer"></div>
+        </div>
+
+        <!-- Palco Central: Mesa de Madeira com as 3 Vazas -->
+        <div class="table-wood-planks">
+          <div class="wood-table-inner">
+            <div id="table-tricks-area">
+              <!-- Renderizado dinamicamente -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Palco Inferior: HUD do Jogador (Esquerda) + Cartas na Mão (Centro) + Controles (Direita) -->
+        <div class="battle-player-stage">
+          <!-- Canto Esquerdo Inferior: Dados da Run e Curingas (movidos do topo para a caixa vermelha) -->
+          <div class="player-hud-box">
+            <div class="player-hud-stats">
+              <div class="bar-badge" id="bar-title">La Esquina de San Telmo</div>
+              <div class="hud-stat-pill">
+                <span>🪙</span>
+                <span id="player-coins-val" style="color: var(--gold-light);">15</span>
+              </div>
+              <div class="hud-stat-pill">
+                <span id="player-lives-val">❤️❤️❤️</span>
+              </div>
+            </div>
+            <div class="player-hud-jokers">
+              <div class="hud-jokers-title">CURINGAS:</div>
+              <div id="equipped-jokers-list" class="hud-jokers-list">
+                <span class="no-jokers-text">Nenhum</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Centro: Cartas na Mão do Jogador -->
+          <div class="player-hand-wrapper">
+            <div id="player-hand" class="pov-fanned-hand">
+              <!-- 3 cartas interativas fanned out -->
+            </div>
+          </div>
+
+          <!-- Canto Direito Inferior: Controles de Ação de Truco -->
+          <div id="player-action-controls" class="player-controls-row">
+            <button id="btn-call-envido" class="pixel-btn btn-envido">
+              ¡Envido!
+            </button>
+            <button id="btn-call-flor" class="pixel-btn btn-flor" style="display: none;">
+              ¡FLOR! (3 pts)
+            </button>
+            <button id="btn-call-truco" class="pixel-btn btn-truco">
+              ¡TRUCO!
+            </button>
+            <button id="btn-fold" class="pixel-btn btn-fold">
+              Irse al Mazo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         3. TELA DA LOJA DO BOTECO (SHOP SCREEN)
+         ==================================================================== -->
+    <div id="shop-screen" class="screen hidden">
+      <div class="shop-header">
+        <div>
+          <h2>🏪 Loja do Boteco</h2>
+          <p style="color: var(--celeste-arg); font-size: 0.9rem;" id="shop-bar-name">La Esquina de San Telmo</p>
+        </div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+          <div class="stat-item">🪙 Moedas: <span id="shop-coins-val" style="color: var(--gold-light);">15</span></div>
+          <div class="stat-item">Vidas: <span id="shop-lives-val">❤️❤️❤️</span></div>
+        </div>
+      </div>
+
+      <!-- Curingas à Venda -->
+      <div class="shop-section">
+        <div class="shop-section-title">🃏 Curingas Disponíveis (Jokers de Boteco)</div>
+        <div id="shop-jokers-list" class="shop-grid"></div>
+      </div>
+
+      <!-- Curingas Equipados -->
+      <div class="shop-section">
+        <div class="shop-section-title">
+          🎒 Seus Curingas Equipados (<span id="equipped-slots-count">0 / 5</span>)
+        </div>
+        <div id="shop-equipped-list" class="shop-grid"></div>
+      </div>
+
+      <!-- Cartas & Melhorias de Baralho -->
+      <div class="shop-section">
+        <div class="shop-section-title">📦 Cartas e Baralho</div>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center; margin-bottom: 12px;">
+          <div id="deck-summary-text" style="font-size: 0.85rem; color: var(--cream-dark);"></div>
+          <button id="btn-purge-card" class="pixel-btn" style="background: #7f1d1d;">
+            Remover Carta Fraca ($8)
+          </button>
+        </div>
+        <div id="shop-cards-list" class="shop-grid"></div>
+      </div>
+
+      <!-- Bebidas & Consumíveis -->
+      <div class="shop-section">
+        <div class="shop-section-title">🍺 Bebidas do Boteco</div>
+        <div id="shop-drinks-list" class="shop-grid"></div>
+      </div>
+
+      <div class="shop-footer-bar">
+        <button id="btn-leave-shop" class="pixel-btn btn-primary" style="font-size: 1.05rem; padding: 12px 24px;">
+          Próximo Desafio ➡️
+        </button>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         4. MODAIS DE INTERAÇÃO (APOSTAS & ENVIDO)
+         ==================================================================== -->
+    <!-- Modal Resposta a Truco -->
+    <div id="bet-response-modal" class="modal-overlay hidden">
+      <div class="pixel-modal">
+        <h3 id="bet-modal-title" style="color: var(--gold-light); margin-bottom: 15px;">Adversário gritou TRUCO!</h3>
+        <p style="color: var(--cream-dark); font-size: 0.9rem; margin-bottom: 20px;">Você vai aceitar o desafio ou correr?</p>
+        <div class="modal-actions">
+          <button id="btn-modal-quiero" class="pixel-btn btn-primary">¡Quiero! (Aceitar)</button>
+          <button id="btn-modal-raise" class="pixel-btn btn-truco" style="display: none;">¡Retruco!</button>
+          <button id="btn-modal-noquiero" class="pixel-btn btn-fold">¡No Quiero! (Correr)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Resposta a Envido -->
+    <div id="envido-response-modal" class="modal-overlay hidden">
+      <div class="pixel-modal">
+        <h3 id="envido-modal-title" style="color: var(--celeste-arg); margin-bottom: 15px;">Adversário cantou ENVIDO!</h3>
+        <p style="color: var(--cream-dark); font-size: 0.9rem; margin-bottom: 20px;">Deseja comparar as cartas do mesmo naipe?</p>
+        <div class="modal-actions">
+          <button id="btn-envido-quiero" class="pixel-btn btn-envido">¡Quiero!</button>
+          <button id="btn-envido-noquiero" class="pixel-btn btn-fold">¡No Quiero!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Vitória na Partida -->
+    <div id="match-victory-modal" class="modal-overlay hidden">
+      <div class="pixel-modal">
+        <h2 style="color: var(--gold-light); margin-bottom: 10px;">🎉 ¡VICTORIA!</h2>
+        <p style="color: var(--cream); font-size: 1.05rem; margin-bottom: 8px;">Você derrotou o adversário no boteco!</p>
+        <div id="victory-coins-earned" style="font-size: 1.2rem; font-weight: bold; color: var(--gold); margin: 15px 0;">
+          +$15 Moedas
+        </div>
+        <div class="modal-actions">
+          <button id="btn-victory-continue" class="pixel-btn btn-primary" style="padding: 10px 20px;">
+            Ir para a Loja do Boteco ➡️
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Derrota na Partida -->
+    <div id="match-defeat-modal" class="modal-overlay hidden">
+      <div class="pixel-modal">
+        <h2 style="color: var(--red-accent); margin-bottom: 10px;">💀 Derrota na Mesa</h2>
+        <p style="color: var(--cream); font-size: 0.95rem; margin-bottom: 8px;">O adversário levou a melhor nesta partida.</p>
+        <p id="defeat-lives-left" style="color: var(--gold); font-size: 1rem; margin-bottom: 15px;">Vidas restantes: ❤️❤️</p>
+        <div class="modal-actions">
+          <button id="btn-defeat-retry" class="pixel-btn btn-primary">
+            Tentar Novamente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Purga de Cartas do Baralho -->
+    <div id="purge-deck-modal" class="modal-overlay hidden">
+      <div class="pixel-modal" style="max-width: 760px;">
+        <h3 style="color: var(--gold-light); margin-bottom: 6px;">Remover Carta do Baralho</h3>
+        <p style="color: var(--cream-dark); font-size: 0.85rem; margin-bottom: 15px;">
+          Clique em qualquer carta fraca para removê-la permanentemente e aumentar a frequência dos seus Ases e Sietes!
+        </p>
+        <div id="purge-cards-grid" class="purge-grid"></div>
+        <div class="modal-actions">
+          <button id="btn-close-purge-modal" class="pixel-btn btn-fold">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Pausa / Menu -->
+    <div id="pause-modal" class="modal-overlay hidden">
+      <div class="pixel-modal" style="max-width: 420px; text-align: center;">
+        <h2 style="color: var(--gold-light); margin-bottom: 6px;">⏸️ JOGO PAUSADO</h2>
+        <p style="color: var(--cream-dark); font-size: 0.85rem; margin-bottom: 18px;">Opções da Partida</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+          <button id="btn-pause-resume" class="pixel-btn btn-primary" style="padding: 10px 16px; font-size: 1rem;">
+            ▶️ Continuar Jogando
+          </button>
+          <button id="btn-pause-fullscreen" class="pixel-btn" style="padding: 8px 16px; font-size: 0.92rem;">
+            ⛶ Alternar Tela Cheia
+          </button>
+          <button id="btn-pause-sound" class="pixel-btn" style="padding: 8px 16px; font-size: 0.92rem;">
+            🔊 Som Ativado
+          </button>
+          <button id="btn-pause-hints" class="pixel-btn" style="padding: 8px 16px; font-size: 0.92rem;">
+            ★ Dicas de Força: ATIVADAS
+          </button>
+          <button id="btn-pause-rules" class="pixel-btn" style="padding: 8px 16px; font-size: 0.92rem;">
+            📖 Regras & Hierarquia
+          </button>
+          <button id="btn-pause-restart-match" class="pixel-btn btn-fold" style="padding: 8px 16px; font-size: 0.92rem;">
+            ↺ Reiniciar Partida Atual
+          </button>
+          <button id="btn-pause-quit-title" class="pixel-btn btn-fold" style="padding: 8px 16px; font-size: 0.92rem; background: #681818;">
+            🚪 Sair para o Menu Principal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Regras -->
+    <div id="rules-modal" class="modal-overlay hidden">
+      <div class="pixel-modal rules-modal-box">
+        <h3 style="color: var(--gold-light); margin-bottom: 12px; text-align: center;">📖 Regras do Truco Argentino & Curingas</h3>
+        <div class="rules-content">
+          <h4>1. Hierarquia de Força das Cartas (da maior para a menor)</h4>
+          <ol>
+            <li><b>1 de Espadas</b> (Ancho de Espadas / Macho) - Força 14</li>
+            <li><b>1 de Bastos</b> (Ancho de Bastos / Hembra) - Força 13</li>
+            <li><b>7 de Espadas</b> (Siete Bravo) - Força 12</li>
+            <li><b>7 de Oros</b> (Siete Bello) - Força 11</li>
+            <li><b>Todos os 3</b> (Espadas, Bastos, Copas, Oros) - Força 10</li>
+            <li><b>Todos os 2</b> - Força 9</li>
+            <li><b>1 de Copas e 1 de Oros</b> (Anchos Falsos) - Força 8</li>
+            <li><b>Todos os 12</b> (Reis) - Força 7</li>
+            <li><b>Todos os 11</b> (Cavalos) - Força 6</li>
+            <li><b>Todos os 10</b> (Sotas) - Força 5</li>
+            <li><b>7 de Copas e 7 de Bastos</b> (Sietes Comuns) - Força 4</li>
+            <li><b>Todos os 6</b> - Força 3</li>
+            <li><b>Todos os 5</b> - Força 2</li>
+            <li><b>Todos os 4</b> (as mais fracas) - Força 1</li>
+          </ol>
+
+          <h4>2. Dinâmica das Vazas (A Mão)</h4>
+          <p>Cada jogador recebe 3 cartas. Disputam-se 3 vazas. Quem vencer 2 vazas ganha a mão.</p>
+          <p><b>Pardas (Empates):</b></p>
+          <ul>
+            <li>Empate na 1ª vaza: quem vencer a 2ª ganha a mão.</li>
+            <li>Empate na 2ª vaza: quem ganhou a 1ª vaza vence imediatamente.</li>
+            <li>Empate em todas: o jogador que é o Mano vence.</li>
+          </ul>
+
+          <h4>3. O Envido</h4>
+          <p>Fase anterior à 1ª vaza. Cartas do mesmo naipe somam <b>20 + valor nominal</b> (figuras 10, 11 e 12 valem 0 para Envido). A maior combinação vence!</p>
+
+          <h4>4. Curingas e Deckbuilding</h4>
+          <p>Após cada partida vencida, você visita a Loja do Boteco para comprar Curingas com passivas únicas, adicionar cartas raras ou purificar cartas fracas do seu baralho.</p>
+        </div>
+        <div class="modal-actions" style="margin-top: 15px;">
+          <button id="btn-close-rules" class="pixel-btn btn-primary">Entendido!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         5. TELAS FINAIS (GAME OVER & VITÓRIA DA RUN)
+         ==================================================================== -->
+    <div id="game-over-screen" class="screen hidden" style="justify-content: center; align-items: center; text-align: center; padding: 30px;">
+      <h1 style="color: var(--red-accent); font-size: 2.8rem; margin-bottom: 12px; text-shadow: 2px 2px #000;">FIM DA RUN</h1>
+      <p style="color: var(--cream); font-size: 1.1rem; margin-bottom: 25px;">Suas vidas de boteco acabaram...</p>
+      <div id="gameover-stats" style="background: rgba(0,0,0,0.5); padding: 18px 30px; border-radius: 6px; border: 2px solid var(--wood-light); margin-bottom: 25px; line-height: 1.7;"></div>
+      <button id="btn-gameover-restart" class="pixel-btn btn-primary" style="font-size: 1.1rem; padding: 12px 24px;">
+        Jogar Novamente 🔄
+      </button>
+    </div>
+
+    <div id="run-won-screen" class="screen hidden" style="justify-content: center; align-items: center; text-align: center; padding: 30px;">
+      <h1 style="color: var(--gold-light); font-size: 2.6rem; margin-bottom: 12px; text-shadow: 2px 2px #000;">🏆 CAMPEÃO DOS BOTECOS!</h1>
+      <p style="color: var(--celeste-arg); font-size: 1.15rem; margin-bottom: 25px;">Você zerou o circuito de Truco Argentino!</p>
+      <div id="runwon-stats" style="background: rgba(0,0,0,0.5); padding: 18px 30px; border-radius: 6px; border: 2px solid var(--gold); margin-bottom: 25px; line-height: 1.7;"></div>
+      <button id="btn-runwon-restart" class="pixel-btn btn-primary" style="font-size: 1.1rem; padding: 12px 24px;">
+        Iniciar Nova Jornada 🔄
+      </button>
+    </div>
+
+    <!-- Container de Toasts Flutuantes -->
+    <div id="toast-container"></div>
+  </div>
+
+  <script type="module" src="src/main.js?v=3d-pov-6"></script>
+</body>
+</html>
+
