@@ -23,6 +23,23 @@ function assert(condition, message) {
 }
 
 console.log('\n--- Testando 1. Hierarquia de Cartas do Truco Argentino ---');
+// Validação de Baralho Limpo (sem 8 e 9)
+let threw8 = false;
+try {
+  new Card(8, SUITS.ESPADAS);
+} catch (e) {
+  threw8 = true;
+}
+assert(threw8, 'Carta 8 é rejeitada e lança erro (Baralho Limpo sem 8)');
+
+let threw9 = false;
+try {
+  new Card(9, SUITS.OROS);
+} catch (e) {
+  threw9 = true;
+}
+assert(threw9, 'Carta 9 é rejeitada e lança erro (Baralho Limpo sem 9)');
+
 const macho = new Card(1, SUITS.ESPADAS);
 const hembra = new Card(1, SUITS.BASTOS);
 const sieteBravo = new Card(7, SUITS.ESPADAS);
@@ -111,6 +128,32 @@ engParda2.playCard('PLAYER', dos); // 2 vs 2 (Empate!)
 engParda2.playCard('OPPONENT', new Card(2, SUITS.BASTOS));
 assert(engParda2.tricks[1].winner === 'TIE', '2ª vaza empatou');
 assert(engParda2.handFinished && engParda2.handWinner === 'PLAYER', 'Venceu a 1ª e empatou a 2ª: vence a mão imediatamente!');
+
+// Regra de Parda 3: 1ª vaza Jogador, 2ª vaza Oponente (1x1), 3ª vaza empata -> Vence quem levou a 1ª
+const engParda3 = new TrucoEngine(false);
+engParda3.playCard('PLAYER', macho); // Jogador leva a 1ª
+engParda3.playCard('OPPONENT', quatro);
+assert(engParda3.tricks[0].winner === 'PLAYER', '1ª vaza vencida pelo Jogador');
+engParda3.playCard('PLAYER', cinco);
+engParda3.playCard('OPPONENT', tres); // Oponente leva a 2ª
+assert(engParda3.tricks[1].winner === 'OPPONENT', '2ª vaza vencida pelo Oponente (1x1)');
+engParda3.playCard('PLAYER', dos);
+engParda3.playCard('OPPONENT', new Card(2, SUITS.ESPADAS)); // Empate na 3ª!
+assert(engParda3.tricks[2].winner === 'TIE', '3ª vaza empatou');
+assert(engParda3.handFinished && engParda3.handWinner === 'PLAYER', 'Empate na 3ª após 1x1: vencedor da 1ª vaza leva a mão');
+
+// Regra de Parda 4: Tríplice Empate (todas as 3 vazas empatam) -> Vence o Mano
+const engPardaTripla = new TrucoEngine(true); // Jogador é o Mano
+engPardaTripla.playCard('PLAYER', tres);
+engPardaTripla.playCard('OPPONENT', new Card(3, SUITS.OROS));
+assert(engPardaTripla.tricks[0].winner === 'TIE', '1ª vaza empatou');
+engPardaTripla.playCard('PLAYER', dos);
+engPardaTripla.playCard('OPPONENT', new Card(2, SUITS.BASTOS));
+assert(engPardaTripla.tricks[1].winner === 'TIE', '2ª vaza empatou');
+engPardaTripla.playCard('PLAYER', seis);
+engPardaTripla.playCard('OPPONENT', new Card(6, SUITS.COPAS));
+assert(engPardaTripla.tricks[2].winner === 'TIE', '3ª vaza empatou');
+assert(engPardaTripla.handFinished && engPardaTripla.handWinner === 'PLAYER', 'Tríplice parda: mão concedida ao Mano (Jogador)');
 
 console.log('\n--- Testando 5. Sistema de Apostas de Truco ---');
 const engBet = new TrucoEngine(true);

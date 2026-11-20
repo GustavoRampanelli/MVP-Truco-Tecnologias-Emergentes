@@ -39,6 +39,62 @@ export class App {
       document.getElementById('rules-modal').classList.add('hidden');
     };
 
+    // Tutorial / Introdução ao Truco Gaudério
+    const openTutorial = () => {
+      this.sound.playClick();
+      document.getElementById('tutorial-modal').classList.remove('hidden');
+    };
+    const closeTutorial = () => {
+      this.sound.playClick();
+      document.getElementById('tutorial-modal').classList.add('hidden');
+    };
+
+    const btnOpenTut = document.getElementById('btn-open-tutorial');
+    if (btnOpenTut) btnOpenTut.onclick = openTutorial;
+
+    const btnPauseTut = document.getElementById('btn-pause-tutorial');
+    if (btnPauseTut) btnPauseTut.onclick = openTutorial;
+
+    const btnShopTut = document.getElementById('btn-shop-tutorial');
+    if (btnShopTut) btnShopTut.onclick = openTutorial;
+
+    const btnCloseTut = document.getElementById('btn-close-tutorial');
+    if (btnCloseTut) btnCloseTut.onclick = closeTutorial;
+
+    const btnCloseTutX = document.getElementById('btn-close-tutorial-x');
+    if (btnCloseTutX) btnCloseTutX.onclick = closeTutorial;
+
+    // Navegação de Abas do Tutorial
+    document.querySelectorAll('.tut-tab-btn').forEach(btn => {
+      btn.onclick = () => {
+        this.sound.playClick();
+        const tabTarget = btn.dataset.tab;
+        document.querySelectorAll('.tut-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tut-tab-content').forEach(c => c.classList.add('hidden'));
+        btn.classList.add('active');
+        const targetEl = document.getElementById(tabTarget);
+        if (targetEl) targetEl.classList.remove('hidden');
+      };
+    });
+
+    // Fechar modais ao clicar fora (Backdrop click)
+    const overlayModals = [
+      { id: 'pause-modal', onClose: () => this.closePauseMenu() },
+      { id: 'rules-modal', onClose: () => document.getElementById('rules-modal').classList.add('hidden') },
+      { id: 'tutorial-modal', onClose: () => document.getElementById('tutorial-modal').classList.add('hidden') },
+      { id: 'purge-deck-modal', onClose: () => document.getElementById('purge-deck-modal').classList.add('hidden') }
+    ];
+    overlayModals.forEach(({ id, onClose }) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('click', (e) => {
+          if (e.target === el) {
+            onClose();
+          }
+        });
+      }
+    });
+
     // Botões de Ação na Mesa
     document.getElementById('btn-call-truco').onclick = (e) => {
       const betType = e.currentTarget.dataset.betType || 'TRUCO';
@@ -176,7 +232,11 @@ export class App {
     // Botão de Avançar na Loja
     document.getElementById('btn-leave-shop').onclick = () => {
       this.sound.playClick();
-      this.runManager.advanceToNextMatch();
+      // Na demo: só avança o oponente se já tiver completado a partida anterior
+      if (this.runManager.runState === 'SHOP_POST_MATCH') {
+        this.runManager.advanceToNextMatch();
+      }
+      this.runManager.runState = 'IN_MATCH';
       this.showScreen('game-screen');
       this.tableRenderer.startMatch();
     };
@@ -184,6 +244,7 @@ export class App {
     // Botões de Vitória/Derrota
     document.getElementById('btn-victory-continue').onclick = () => {
       document.getElementById('match-victory-modal').classList.add('hidden');
+      this.runManager.runState = 'SHOP_POST_MATCH';
       this.showScreen('shop-screen');
       this.shopRenderer.render();
     };
@@ -314,8 +375,11 @@ export class App {
 
   startNewRun() {
     this.runManager.reset();
-    this.showScreen('game-screen');
-    this.tableRenderer.startMatch();
+    this.runManager.runState = 'SHOP_PRE_MATCH';
+    this.runManager.shop.restock();
+    this.showScreen('shop-screen');
+    this.shopRenderer.render();
+    Dialogs.showToast('🏪 Bem-vindo à Loja! Compre seus primeiros Curingas antes da 1ª partida.', 'reward', 4500);
   }
 
   showVictoryModal(rewardCoins) {

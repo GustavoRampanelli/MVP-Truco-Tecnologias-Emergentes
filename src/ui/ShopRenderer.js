@@ -30,6 +30,16 @@ export class ShopRenderer {
     this.renderCardsForSale();
     this.renderDrinks();
     this.renderDeckStats();
+
+    const leaveBtn = document.getElementById('btn-leave-shop');
+    if (leaveBtn) {
+      const opp = this.runManager.getCurrentOpponent();
+      if (this.runManager.stats.matchesWon === 0) {
+        leaveBtn.textContent = `Partir para a 1ª Partida (vs ${opp.name}) ➡️`;
+      } else {
+        leaveBtn.textContent = `Partir para a Partida (vs ${opp.name}) ➡️`;
+      }
+    }
   }
 
   renderJokersForSale() {

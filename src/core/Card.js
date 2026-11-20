@@ -12,14 +12,20 @@ export const SUITS = {
 
 export const SUIT_LIST = [SUITS.BASTOS, SUITS.COPAS, SUITS.OROS, SUITS.ESPADAS];
 
+export const VALID_CARD_VALUES = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12];
+
 export class Card {
   /**
-   * @param {number} value - 1 a 12
+   * @param {number} value - 1 a 12 (exceto 8 e 9)
    * @param {object} suit - objeto de SUITS
    * @param {string} [id] - ID único da carta
    * @param {object} [modifiers] - modificadores roguelike (ex: força extra, bônus moedas)
    */
   constructor(value, suit, id = null, modifiers = {}) {
+    if (!VALID_CARD_VALUES.includes(value)) {
+      throw new Error(`Carta inválida no Truco Gaudério: valor ${value}. O baralho não possui cartas 8 e 9.`);
+    }
+
     this.value = value;
     this.suit = suit;
     this.id = id || `${value}_${suit.id}_${Math.random().toString(36).substring(2, 7)}`;
@@ -31,12 +37,12 @@ export class Card {
   }
 
   /**
-   * Força básica no Truco Argentino (de 1 a 14)
+   * Força básica no Truco Argentino / Gaudério (de 1 a 14)
    */
   getBaseTrucoPower() {
-    // 1 de Espadas (Macho)
+    // 1 de Espadas (Macho / Espadilha)
     if (this.value === 1 && this.suit.id === 'ESPADAS') return 14;
-    // 1 de Bastos (Hembra)
+    // 1 de Bastos (Hembra / Bastilha)
     if (this.value === 1 && this.suit.id === 'BASTOS') return 13;
     // 7 de Espadas (Siete Bravo)
     if (this.value === 7 && this.suit.id === 'ESPADAS') return 12;
@@ -53,7 +59,7 @@ export class Card {
     // Figuras
     if (this.value === 12) return 7; // Rey
     if (this.value === 11) return 6; // Caballo
-    if (this.value === 10) return 5; // Sota
+    if (this.value === 10) return 5; // Sota / Príncipe
 
     // Sietes falsos (Copas e Bastos)
     if (this.value === 7) return 4;
@@ -61,11 +67,7 @@ export class Card {
     // Cartas baixas
     if (this.value === 6) return 3;
     if (this.value === 5) return 2;
-    if (this.value === 4) return 1;
-
-    // 8 e 9 (caso presentes no baralho expandido)
-    if (this.value === 9) return 0.7;
-    if (this.value === 8) return 0.5;
+    if (this.value === 4) return 1; // Mais baixa
 
     return 0;
   }

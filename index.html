@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Truco Argentino: Deckbuilder de Boteco (PoC)</title>
-  <link rel="stylesheet" href="style.css?v=3d-pov-6">
+  <link rel="stylesheet" href="style.css?v=3d-pov-7">
 </head>
 <body>
   <div id="app-container">
@@ -32,10 +32,13 @@
 
       <div class="title-actions">
         <button id="btn-start-run" class="pixel-btn btn-primary" style="font-size: 1.1rem; padding: 12px;">
-          ▶ Iniciar Nova Run
+          ▶ Iniciar Nova Run (Ir para a Loja)
+        </button>
+        <button id="btn-open-tutorial" class="pixel-btn" style="font-size: 1rem; border-color: var(--celeste-arg); color: var(--celeste-arg);">
+          🎓 Introdução ao Truco Gaudério
         </button>
         <button id="btn-open-rules" class="pixel-btn">
-          📖 Regras do Truco & Curingas
+          📖 Regras & Hierarquia Rápida
         </button>
         <button id="btn-title-fullscreen" class="pixel-btn" style="font-size: 0.95rem;">
           ⛶ Alternar Tela Cheia
@@ -202,9 +205,12 @@
         <div id="shop-drinks-list" class="shop-grid"></div>
       </div>
 
-      <div class="shop-footer-bar">
-        <button id="btn-leave-shop" class="pixel-btn btn-primary" style="font-size: 1.05rem; padding: 12px 24px;">
-          Próximo Desafio ➡️
+      <div class="shop-footer-bar" style="display: flex; gap: 15px; justify-content: center; align-items: center;">
+        <button id="btn-shop-tutorial" class="pixel-btn" style="padding: 10px 18px; font-size: 0.95rem;">
+          🎓 Introdução ao Truco
+        </button>
+        <button id="btn-leave-shop" class="pixel-btn btn-primary" style="font-size: 1.1rem; padding: 12px 28px;">
+          Partir para a Partida ➡️
         </button>
       </div>
     </div>
@@ -300,14 +306,107 @@
           <button id="btn-pause-hints" class="pixel-btn" style="padding: 8px 16px; font-size: 0.92rem;">
             ★ Dicas de Força: ATIVADAS
           </button>
+          <button id="btn-pause-tutorial" class="pixel-btn" style="padding: 8px 16px; font-size: 0.92rem; border-color: var(--celeste-arg); color: var(--celeste-arg);">
+            🎓 Introdução ao Truco Gaudério
+          </button>
           <button id="btn-pause-rules" class="pixel-btn" style="padding: 8px 16px; font-size: 0.92rem;">
-            📖 Regras & Hierarquia
+            📖 Regras & Hierarquia Rápida
           </button>
           <button id="btn-pause-restart-match" class="pixel-btn btn-fold" style="padding: 8px 16px; font-size: 0.92rem;">
             ↺ Reiniciar Partida Atual
           </button>
           <button id="btn-pause-quit-title" class="pixel-btn btn-fold" style="padding: 8px 16px; font-size: 0.92rem; background: #681818;">
             🚪 Sair para o Menu Principal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Introdução / Tutorial do Truco Gaudério -->
+    <div id="tutorial-modal" class="modal-overlay hidden">
+      <div class="pixel-modal tutorial-modal-box" style="max-width: 680px; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold-dark); padding-bottom: 8px; margin-bottom: 12px;">
+          <h2 style="color: var(--gold-light); font-size: 1.25rem;">🎓 Introdução ao Truco Gaudério</h2>
+          <button id="btn-close-tutorial-x" class="pixel-btn" style="padding: 2px 8px; font-size: 0.85rem;">✖</button>
+        </div>
+
+        <!-- Abas do Tutorial -->
+        <div class="tutorial-tabs-nav" style="display: flex; gap: 8px; margin-bottom: 14px;">
+          <button class="pixel-btn tut-tab-btn active" data-tab="tut-tab-1" style="flex: 1; font-size: 0.82rem; padding: 6px;">1. Os 4 Bravos (Manilhas)</button>
+          <button class="pixel-btn tut-tab-btn" data-tab="tut-tab-2" style="flex: 1; font-size: 0.82rem; padding: 6px;">2. Vazas & Pardas</button>
+          <button class="pixel-btn tut-tab-btn" data-tab="tut-tab-3" style="flex: 1; font-size: 0.82rem; padding: 6px;">3. Envido & Gritos</button>
+        </div>
+
+        <!-- Conteúdo Aba 1: Os 4 Bravos -->
+        <div id="tut-tab-1" class="tut-tab-content">
+          <p style="color: var(--cream); font-size: 0.9rem; margin-bottom: 10px;">
+            No <b>Truco Gaudério / Cego</b>, joga-se com o baralho espanhol de <b>40 cartas</b> (sem 8 e 9). As 4 maiores cartas do jogo têm nomes próprios e nunca perdem para as cartas comuns:
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <div style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--gold);">
+              <div style="color: var(--gold-light); font-weight: bold; font-size: 0.95rem;">1º ⚔️ Ás de Espadas</div>
+              <div style="color: var(--celeste-arg); font-size: 0.82rem;">"Macho" ou "Espadilha" (Força 14)</div>
+              <div style="color: var(--cream-dark); font-size: 0.78rem;">A carta mais forte do baralho. Mata qualquer outra carta.</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--gold);">
+              <div style="color: var(--gold-light); font-weight: bold; font-size: 0.95rem;">2º 🪵 Ás de Paus (Bastos)</div>
+              <div style="color: var(--celeste-arg); font-size: 0.82rem;">"Fêmea" ou "Bastilha" (Força 13)</div>
+              <div style="color: var(--cream-dark); font-size: 0.78rem;">Segunda maior carta. Supera os dois 7 bravos.</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--gold);">
+              <div style="color: var(--gold-light); font-weight: bold; font-size: 0.95rem;">3º ⚔️ 7 de Espadas</div>
+              <div style="color: var(--celeste-arg); font-size: 0.82rem;">"Sete Bravo" ou "Sete de Espadas" (Força 12)</div>
+              <div style="color: var(--cream-dark); font-size: 0.78rem;">Vence todos os 3s, 2s e figuras.</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--gold);">
+              <div style="color: var(--gold-light); font-weight: bold; font-size: 0.95rem;">4º 🪙 7 de Oros</div>
+              <div style="color: var(--celeste-arg); font-size: 0.82rem;">"Sete Belo" ou "Sete de Ouro" (Força 11)</div>
+              <div style="color: var(--cream-dark); font-size: 0.78rem;">O quarto bravo. Fecha a elite das manilhas fixas.</div>
+            </div>
+          </div>
+          <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--gold); padding: 6px 10px; font-size: 0.82rem; color: var(--cream);">
+            💡 <b>Atenção:</b> Os outros Ases (Copas e Oros) e os outros 7 (Copas e Paus) são <b>falsos/comuns</b> e têm forças menores.
+          </div>
+        </div>
+
+        <!-- Conteúdo Aba 2: Vazas e Pardas -->
+        <div id="tut-tab-2" class="tut-tab-content hidden">
+          <p style="color: var(--cream); font-size: 0.9rem; margin-bottom: 10px;">
+            Cada jogador recebe <b>3 cartas</b>. Disputa-se uma melhor de <b>3 vazas</b>:
+          </p>
+          <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px; border: 1px solid var(--wood-light); font-size: 0.85rem; line-height: 1.6; margin-bottom: 10px;">
+            <div style="color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">⚖️ Regras de Desempate (Parda):</div>
+            <div>• <b>Empatou na 1ª vaza?</b> Quem ganhar a 2ª vaza leva a mão inteira.</div>
+            <div>• <b>Empatou na 1ª e na 2ª?</b> A 3ª vaza decide tudo. Se a 3ª também empatar, vence o <b>Mano</b> (quem começou a mão).</div>
+            <div>• <b>Ganhou a 1ª e empatou a 2ª?</b> Quem ganhou a 1ª vence a mão imediatamente!</div>
+            <div>• <b>1 a 1 e empatou a 3ª?</b> Desempata a favor de quem fez a 1ª vaza.</div>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--cream-dark);">
+            <b>Hierarquia Completa:</b> 1E (14) > 1B (13) > 7E (12) > 7O (11) > Todos os 3 (10) > Todos os 2 (9) > 1C/1O (8) > 12s (7) > 11s (6) > 10s (5) > 7C/7B (4) > 6s (3) > 5s (2) > 4s (1).
+          </div>
+        </div>
+
+        <!-- Conteúdo Aba 3: Envido, Flor e Apostas -->
+        <div id="tut-tab-3" class="tut-tab-content hidden">
+          <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px; border: 1px solid var(--wood-light); font-size: 0.85rem; line-height: 1.6; margin-bottom: 10px;">
+            <div style="color: var(--celeste-arg); font-weight: bold; margin-bottom: 4px;">🍷 O Envido & Flor (Antes da 1ª Vaza):</div>
+            <div>• Duas cartas do mesmo naipe somam <b>20 + valores faciais</b> (ex: 7 e 6 de Oros = 33 pontos). Figuras (10, 11 e 12) valem 0 para Envido.</div>
+            <div>• Se tiver 3 cartas do mesmo naipe, você tem <b>FLOR</b> (3 tentos garantidos se cantada)!</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px; border: 1px solid var(--gold); font-size: 0.85rem; line-height: 1.6; margin-bottom: 10px;">
+            <div style="color: var(--gold-light); font-weight: bold; margin-bottom: 4px;">🔥 Gritos de Truco:</div>
+            <div>• <b>¡TRUCO!</b>: Eleva a mão para 2 tentos (se correr, vale 1).</div>
+            <div>• <b>¡RETRUCO!</b>: Sobe para 3 tentos (se correr, vale 2).</div>
+            <div>• <b>¡VALE CUATRO!</b>: Sobe para 4 tentos (se correr, vale 3).</div>
+          </div>
+          <div style="background: rgba(136, 19, 55, 0.4); padding: 8px 10px; border-radius: 6px; border: 1px solid #e11d48; font-size: 0.82rem; color: var(--cream);">
+            🃏 <b>Roguelike Deckbuilder:</b> Nesta demo, você abre a <b>Loja do Boteco antes da 1ª partida</b> para comprar Curingas (como <i>Gaucho Astuto</i>, <i>Mate Amargo</i> e <i>Jimbo</i>) e entrar com bônus na mesa!
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 14px; display: flex; justify-content: flex-end;">
+          <button id="btn-close-tutorial" class="pixel-btn btn-primary" style="padding: 10px 22px; font-size: 1rem;">
+            Entendido, ir para a Loja e Jogar! 🤠
           </button>
         </div>
       </div>
@@ -382,7 +481,7 @@
     <div id="toast-container"></div>
   </div>
 
-  <script type="module" src="src/main.js?v=3d-pov-6"></script>
+  <script type="module" src="src/main.js?v=3d-pov-7"></script>
 </body>
 </html>
 

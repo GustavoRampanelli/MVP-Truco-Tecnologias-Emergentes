@@ -1043,6 +1043,32 @@ body {
   text-align: left;
 }
 
+.tutorial-modal-box {
+  max-width: 680px;
+  max-height: 84vh;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.tut-tab-btn {
+  background: #2b180e;
+  color: var(--cream-dark);
+  border: 1px solid var(--wood-light);
+  transition: all 0.2s ease;
+}
+
+.tut-tab-btn:hover {
+  background: #442617;
+  color: var(--gold-light);
+}
+
+.tut-tab-btn.active {
+  background: var(--gold-dark);
+  color: #fff;
+  border-color: var(--gold-light);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
 .rules-content {
   font-size: 0.88rem;
   line-height: 1.5;
