@@ -1466,3 +1466,184 @@ body {
   font-size: 0.85rem;
   text-align: center;
 }
+
+/* ============================================================
+   GUIA VISUAL DE REGRAS & HIERARQUIA (LÚDICO COM SPRITES)
+   ============================================================ */
+.rules-modal-box {
+  max-width: 780px;
+  width: 94%;
+}
+
+.rules-section {
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.rules-section-title {
+  color: var(--gold-light);
+  margin: 0 0 6px 0;
+  font-size: 0.98rem;
+}
+
+.rules-hint {
+  font-size: 0.82rem;
+  color: #ddd;
+  margin: 0 0 10px 0;
+}
+
+.rules-bravos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .rules-bravos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.rules-bravo-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: 8px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.rules-ladder-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 680px) {
+  .rules-ladder-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.rules-ladder-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 7px 4px;
+  text-align: center;
+}
+
+.rules-rank-pill {
+  font-size: 0.72rem;
+  font-weight: bold;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: rgba(116, 172, 223, 0.2);
+  border: 1px solid rgba(116, 172, 223, 0.5);
+  color: #bfe0ff;
+}
+
+.rules-rank-pill.gold {
+  background: rgba(255, 215, 0, 0.22);
+  border-color: #ffd700;
+  color: #ffe875;
+}
+
+.rules-mini-cards-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.rules-tile-name {
+  font-size: 0.76rem;
+  font-weight: bold;
+  color: var(--cream);
+}
+
+.rules-tile-sub {
+  font-size: 0.7rem;
+  color: #bbb;
+}
+
+.rules-examples-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .rules-examples-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rules-example-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(116, 172, 223, 0.08);
+  border: 1px solid rgba(116, 172, 223, 0.35);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.rules-example-box.flor {
+  background: rgba(236, 72, 153, 0.08);
+  border-color: rgba(236, 72, 153, 0.4);
+}
+
+.rules-ex-title {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--gold-light);
+}
+
+.rules-ex-desc {
+  font-size: 0.76rem;
+  color: #ddd;
+  line-height: 1.4;
+}
+
+.rules-cards-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .rules-cards-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rules-info-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #ddd;
+}
+
+.rules-info-card b {
+  color: var(--celeste-arg);
+}
+
+.rules-info-card p {
+  margin: 4px 0 0 0;
+}

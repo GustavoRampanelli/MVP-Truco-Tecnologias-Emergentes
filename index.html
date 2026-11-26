@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Truco Argentino: Deckbuilder de Boteco (PoC)</title>
-  <link rel="stylesheet" href="style.css?v=3d-pov-11">
+  <link rel="stylesheet" href="style.css?v=3d-pov-12">
 </head>
 <body>
   <div id="app-container">
@@ -417,46 +417,18 @@
       </div>
     </div>
 
-    <!-- Modal de Regras -->
+    <!-- Modal de Regras (Lúdico com Sprites) -->
     <div id="rules-modal" class="modal-overlay hidden">
       <div class="pixel-modal rules-modal-box">
-        <h3 style="color: var(--gold-light); margin-bottom: 12px; text-align: center;">📖 Regras do Truco Argentino & Curingas</h3>
-        <div class="rules-content">
-          <h4>1. Hierarquia de Força das Cartas (da maior para a menor)</h4>
-          <ol>
-            <li><b>1 de Espadas</b> (Ancho de Espadas / Macho) - Força 14</li>
-            <li><b>1 de Bastos</b> (Ancho de Bastos / Hembra) - Força 13</li>
-            <li><b>7 de Espadas</b> (Siete Bravo) - Força 12</li>
-            <li><b>7 de Oros</b> (Siete Bello) - Força 11</li>
-            <li><b>Todos os 3</b> (Espadas, Bastos, Copas, Oros) - Força 10</li>
-            <li><b>Todos os 2</b> - Força 9</li>
-            <li><b>1 de Copas e 1 de Oros</b> (Anchos Falsos) - Força 8</li>
-            <li><b>Todos os 12</b> (Reis) - Força 7</li>
-            <li><b>Todos os 11</b> (Cavalos) - Força 6</li>
-            <li><b>Todos os 10</b> (Sotas) - Força 5</li>
-            <li><b>7 de Copas e 7 de Bastos</b> (Sietes Comuns) - Força 4</li>
-            <li><b>Todos os 6</b> - Força 3</li>
-            <li><b>Todos os 5</b> - Força 2</li>
-            <li><b>Todos os 4</b> (as mais fracas) - Força 1</li>
-          </ol>
-
-          <h4>2. Dinâmica das Vazas (A Mão)</h4>
-          <p>Cada jogador recebe 3 cartas. Disputam-se 3 vazas. Quem vencer 2 vazas ganha a mão.</p>
-          <p><b>Pardas (Empates):</b></p>
-          <ul>
-            <li>Empate na 1ª vaza: quem vencer a 2ª ganha a mão.</li>
-            <li>Empate na 2ª vaza: quem ganhou a 1ª vaza vence imediatamente.</li>
-            <li>Empate em todas: o jogador que é o Mano vence.</li>
-          </ul>
-
-          <h4>3. O Envido</h4>
-          <p>Fase anterior à 1ª vaza. Cartas do mesmo naipe somam <b>20 + valor nominal</b> (figuras 10, 11 e 12 valem 0 para Envido). A maior combinação vence!</p>
-
-          <h4>4. Curingas e Deckbuilding</h4>
-          <p>Após cada partida vencida, você visita a Loja do Boteco para comprar Curingas com passivas únicas, adicionar cartas raras ou purificar cartas fracas do seu baralho.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="color: var(--gold-light); margin: 0;">📖 Guia Visual: Regras & Hierarquia</h3>
+          <button id="btn-close-rules-x" class="pixel-btn" style="padding: 4px 10px;">✖</button>
         </div>
-        <div class="modal-actions" style="margin-top: 15px;">
-          <button id="btn-close-rules" class="pixel-btn btn-primary">Entendido!</button>
+        <div id="rules-visual-body" class="rules-content">
+          <!-- Renderizado dinamicamente com os sprites das cartas via RulesRenderer -->
+        </div>
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button id="btn-close-rules" class="pixel-btn btn-primary">Entendido! 🤠</button>
         </div>
       </div>
     </div>
@@ -556,7 +528,7 @@
     <canvas id="particle-canvas"></canvas>
   </div>
 
-  <script type="module" src="src/main.js?v=3d-pov-11"></script>
+  <script type="module" src="src/main.js?v=3d-pov-12"></script>
 </body>
 </html>
 

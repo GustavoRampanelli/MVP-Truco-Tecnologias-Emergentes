@@ -9,6 +9,7 @@ import { ShopRenderer } from './ShopRenderer.js';
 import { Dialogs } from './Dialogs.js';
 import { ParticleManager } from './ParticleManager.js';
 import { MultiplayerClient } from './MultiplayerClient.js';
+import { RulesRenderer } from './RulesRenderer.js';
 
 export class App {
   constructor() {
@@ -46,12 +47,17 @@ export class App {
 
     document.getElementById('btn-open-rules').onclick = () => {
       this.sound.playClick();
+      RulesRenderer.render(this.particles);
       document.getElementById('rules-modal').classList.remove('hidden');
     };
 
     document.getElementById('btn-close-rules').onclick = () => {
       document.getElementById('rules-modal').classList.add('hidden');
     };
+
+    document.getElementById('btn-close-rules-x')?.addEventListener('click', () => {
+      document.getElementById('rules-modal').classList.add('hidden');
+    });
 
     // Tutorial / Introdução ao Truco Gaudério
     const openTutorial = () => {
@@ -202,6 +208,7 @@ export class App {
     if (pauseRulesBtn) {
       pauseRulesBtn.onclick = () => {
         this.sound.playClick();
+        RulesRenderer.render(this.particles);
         document.getElementById('rules-modal').classList.remove('hidden');
       };
     }
