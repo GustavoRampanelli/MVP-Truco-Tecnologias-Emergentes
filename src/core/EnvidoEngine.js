@@ -14,10 +14,11 @@ export class EnvidoEngine {
       return { points: 0, suit: null, isFlor: false, details: 'Sem cartas' };
     }
 
-    // Agrupar por naipe
+    // B2 FIX: sempre usar card.suit.id real (nunca propriedades modificadas por curingas)
+    // Agrupar por naipe real (imutável)
     const suitsMap = {};
     for (const card of cards) {
-      const sId = card.suit.id;
+      const sId = card.suit.id; // .suit é sempre o naipe físico da carta
       if (!suitsMap[sId]) suitsMap[sId] = [];
       suitsMap[sId].push(card);
     }

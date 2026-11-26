@@ -280,6 +280,14 @@ export class App {
 
     this.updateFullscreenUI();
     this.updateSoundUI();
+
+    // Trocar música de fundo de acordo com a tela
+    if (screenId === 'game-screen') {
+      this.sound.playMatchMusic();
+    } else {
+      // title-screen, shop-screen, game-over-screen, run-won-screen → música de menu
+      this.sound.playMenuMusic();
+    }
   }
 
   toggleFullscreen() {
@@ -330,6 +338,7 @@ export class App {
 
   toggleSound() {
     this.sound.muted = !this.sound.muted;
+    this.sound.setMuted(this.sound.muted);
     this.updateSoundUI();
   }
 

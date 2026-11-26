@@ -195,6 +195,9 @@ export class TableRenderer {
   }
 
   renderTableCards() {
+    // U2 — Atualizar indicador de vez
+    this._updateTurnIndicator();
+
     // 1. Mão do Adversário (ícones de cartas como vida abaixo dele, sem texto)
     const oppHandEl = document.getElementById('opponent-hand');
     if (oppHandEl) {
@@ -226,6 +229,10 @@ export class TableRenderer {
           scale: 0.98,
           onClick: () => this.handlePlayerPlayCard(card, index)
         });
+        // U2: glow nas cartas quando é vez do jogador
+        if (this.currentHand.isPlayerTurn && !this.currentHand.awaitingBetResponse) {
+          cardEl.classList.add('card-your-turn');
+        }
         playerHandEl.appendChild(cardEl);
       });
     }
@@ -258,13 +265,13 @@ export class TableRenderer {
       const cardsContainer = document.createElement('div');
       cardsContainer.className = 'trick-cards-flex';
 
-      // Carta do adversário
+      // Carta do oponente — com animação U1 se recém jogada
       if (trick.opponentCard) {
         const oppCardEl = CardSprite.createCardElement(trick.opponentCard, {
           scale: 0.75,
           showHints: this.showHints
         });
-        oppCardEl.classList.add('table-played-card');
+        oppCardEl.classList.add('table-played-card', 'card-fly-in');
         cardsContainer.appendChild(oppCardEl);
       } else {
         const emptyOpp = document.createElement('div');
@@ -273,13 +280,13 @@ export class TableRenderer {
         cardsContainer.appendChild(emptyOpp);
       }
 
-      // Carta do jogador
+      // Carta do jogador — com animação U1 se recém jogada
       if (trick.playerCard) {
         const pCardEl = CardSprite.createCardElement(trick.playerCard, {
           scale: 0.75,
           showHints: this.showHints
         });
-        pCardEl.classList.add('table-played-card');
+        pCardEl.classList.add('table-played-card', 'card-fly-in');
         cardsContainer.appendChild(pCardEl);
       } else {
         const emptyP = document.createElement('div');
@@ -291,6 +298,28 @@ export class TableRenderer {
       trickSlot.appendChild(cardsContainer);
       trickArea.appendChild(trickSlot);
     });
+  }
+
+  /** U2 — Atualiza o indicador visual de vez (banner "SUA VEZ" / "Aguardando...") */
+  _updateTurnIndicator() {
+    const el = document.getElementById('turn-indicator');
+    if (!el) return;
+    const engine = this.currentHand.trucoEngine;
+    if (!engine || engine.handFinished) {
+      el.className = 'turn-indicator hidden';
+      return;
+    }
+    if (this.currentHand.awaitingBetResponse) {
+      el.textContent = '⚡ Responda a aposta!';
+      el.className = 'turn-indicator turn-bet';
+    } else if (this.currentHand.isPlayerTurn) {
+      el.textContent = '🫵 SUA VEZ — jogue uma carta';
+      el.className = 'turn-indicator turn-player';
+    } else {
+      const oppName = this.ai ? this.ai.name : 'Adversário';
+      el.textContent = `⏳ Aguardando ${oppName}...`;
+      el.className = 'turn-indicator turn-opponent';
+    }
   }
 
   updateControls() {
@@ -324,7 +353,12 @@ export class TableRenderer {
     // Truco: depende do nível atual
     if (trucoBtn) {
       const nextBet = engine.currentBet.nextBet;
-      if (nextBet && engine.lastBettor !== 'PLAYER' && !engine.betPending) {
+      // B3: se HÁ aposta pendente do oponente, mostrar botões de resposta — não desabilitar silenciosamente
+      if (engine.betPending && engine.betPending.from === 'OPPONENT') {
+        // O modal de resposta já é exibido por triggerAiTrucoProposal; apenas esconde o botão
+        trucoBtn.disabled = true;
+        trucoBtn.textContent = `Responder ${BET_LEVELS[engine.betPending.type].name}...`;
+      } else if (nextBet && engine.lastBettor !== 'PLAYER' && !engine.betPending) {
         trucoBtn.disabled = !this.currentHand.isPlayerTurn;
         trucoBtn.textContent = BET_LEVELS[nextBet].name;
         trucoBtn.dataset.betType = nextBet;
@@ -375,10 +409,13 @@ export class TableRenderer {
 
   /**
    * Turno da Inteligência Artificial
+   * FIX B1: guarda explícita contra race condition — só executa se não for vez do jogador
    */
   processAiTurn() {
     const engine = this.currentHand.trucoEngine;
     if (engine.handFinished || this.currentHand.awaitingBetResponse) return;
+    // B1: se por qualquer motivo isPlayerTurn virou true antes do timeout disparar, aborta
+    if (this.currentHand.isPlayerTurn) return;
 
     const currentTrick = engine.tricks[engine.currentTrick];
     const playerCardOnTable = currentTrick ? currentTrick.playerCard : null;

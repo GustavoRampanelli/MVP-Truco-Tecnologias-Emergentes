@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Truco Argentino: Deckbuilder de Boteco (PoC)</title>
-  <link rel="stylesheet" href="style.css?v=3d-pov-7">
+  <link rel="stylesheet" href="style.css?v=3d-pov-8">
 </head>
 <body>
   <div id="app-container">
@@ -134,6 +134,8 @@
 
           <!-- Centro: Cartas na Mão do Jogador -->
           <div class="player-hand-wrapper">
+            <!-- U2: Indicador de vez -->
+            <div id="turn-indicator" class="turn-indicator hidden"></div>
             <div id="player-hand" class="pov-fanned-hand">
               <!-- 3 cartas interativas fanned out -->
             </div>
@@ -481,7 +483,7 @@
     <div id="toast-container"></div>
   </div>
 
-  <script type="module" src="src/main.js?v=3d-pov-7"></script>
+  <script type="module" src="src/main.js?v=3d-pov-8"></script>
 </body>
 </html>
 
