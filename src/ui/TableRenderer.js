@@ -233,6 +233,16 @@ export class TableRenderer {
         if (this.currentHand.isPlayerTurn && !this.currentHand.awaitingBetResponse) {
           cardEl.classList.add('card-your-turn');
         }
+        // Partículas ao passar o mouse nas cartas da mão
+        const isBravo = card.getBaseTrucoPower() >= 11;
+        let lastHoverSparkle = 0;
+        cardEl.addEventListener('mousemove', () => {
+          const now = performance.now();
+          if (now - lastHoverSparkle > (isBravo ? 90 : 180)) {
+            lastHoverSparkle = now;
+            this.app.particles?.sparkleCardHover(cardEl, isBravo);
+          }
+        });
         playerHandEl.appendChild(cardEl);
       });
     }
@@ -389,12 +399,20 @@ export class TableRenderer {
     msgs.forEach(m => {
       Dialogs.showToast(m, 'reward');
       this.sound.playCoin();
+      this.app.particles?.burstCoins();
       this.renderHeader();
     });
 
     // Registrar no motor
+    const playedTrickIdx = engine.currentTrick;
     engine.playCard('PLAYER', card);
     this.renderTableCards();
+
+    // Partículas de impacto ao jogar carta na mesa
+    const trickSlots = document.querySelectorAll('#table-tricks-area .trick-slot');
+    const targetSlot = trickSlots[playedTrickIdx];
+    const playedCardEl = targetSlot?.querySelector('.trick-cards-flex > :last-child');
+    this.app.particles?.burstCardPlay(playedCardEl || targetSlot, card.getBaseTrucoPower() >= 11);
 
     // Passar turno para IA ou resolver vaza
     const trick = engine.tricks[engine.currentTrick];
@@ -448,9 +466,16 @@ export class TableRenderer {
       this.currentHand.opponentHand.splice(cardIdx, 1);
     }
 
+    const playedTrickIdx = engine.currentTrick;
     this.sound.playCardSlide();
     engine.playCard('OPPONENT', chosenCard);
     this.renderTableCards();
+
+    // Partículas de impacto quando o adversário joga carta
+    const trickSlots = document.querySelectorAll('#table-tricks-area .trick-slot');
+    const targetSlot = trickSlots[playedTrickIdx];
+    const playedOppEl = targetSlot?.querySelector('.trick-cards-flex > :first-child');
+    this.app.particles?.burstCardPlay(playedOppEl || targetSlot, chosenCard.getBaseTrucoPower() >= 11);
 
     // Verificar se vaza foi concluída
     if (currentTrick && currentTrick.playerCard && currentTrick.opponentCard) {
@@ -472,6 +497,7 @@ export class TableRenderer {
       // Sons e feedbacks da vaza
       if (resolvedTrick.winner === 'PLAYER') {
         this.sound.playTrickWon();
+        this.app.particles?.burstVictory('trick');
         Dialogs.showToast(`Você levou a vaza!`, 'success', 1500);
       } else if (resolvedTrick.winner === 'OPPONENT') {
         this.sound.playTrickLost();
@@ -487,6 +513,7 @@ export class TableRenderer {
       msgs.forEach(m => {
         Dialogs.showToast(m, 'reward');
         this.sound.playCoin();
+        this.app.particles?.burstCoins();
         this.renderHeader();
       });
     }
@@ -518,6 +545,7 @@ export class TableRenderer {
       this.matchState.playerScore += points;
       this.runManager.stats.handsWon++;
       this.sound.playTrickWon();
+      this.app.particles?.burstVictory('hand');
       Dialogs.showToast(`<b>¡MÃO GANHA!</b> Você somou +${points} tento(s)!`, 'success', 3000);
 
       // Hooks de Curinga de vitória de mão (ex: Mate Amargo, Tango Dramático)
@@ -553,6 +581,7 @@ export class TableRenderer {
     if (!engine.proposeBet('PLAYER', betType)) return;
 
     this.sound.playTrucoCall();
+    this.app.particles?.burstTruco(betType);
     Dialogs.triggerScreenShake();
     this.runManager.stats.trucosCalled++;
 
@@ -593,6 +622,7 @@ export class TableRenderer {
     const engine = this.currentHand.trucoEngine;
     engine.proposeBet('OPPONENT', betType);
     this.sound.playTrucoCall();
+    this.app.particles?.burstTruco(betType);
     Dialogs.triggerScreenShake();
     Dialogs.showOpponentSpeech(`¡${BET_LEVELS[betType].name}!`);
 
@@ -735,6 +765,7 @@ export class TableRenderer {
   // --- MATCH ENDING ---
   handleMatchWin() {
     this.sound.playMatchVictory();
+    this.app.particles?.burstVictory('match');
     const res = this.runManager.handleMatchVictory();
 
     if (res.runWon) {

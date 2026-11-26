@@ -7,11 +7,13 @@ import { SoundManager } from '../audio/SoundManager.js';
 import { TableRenderer } from './TableRenderer.js';
 import { ShopRenderer } from './ShopRenderer.js';
 import { Dialogs } from './Dialogs.js';
+import { ParticleManager } from './ParticleManager.js';
 
 export class App {
   constructor() {
     this.runManager = new RunManager();
     this.sound = new SoundManager();
+    this.particles = new ParticleManager('particle-canvas');
     this.tableRenderer = new TableRenderer(this, this.runManager, this.sound);
     this.shopRenderer = new ShopRenderer(this, this.runManager, this.sound);
 

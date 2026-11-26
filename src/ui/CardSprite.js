@@ -35,6 +35,9 @@ export class CardSprite {
     el.className = 'pixel-card';
     if (interactive) el.classList.add('interactive');
     if (isFaceDown) el.classList.add('face-down');
+    if (!isFaceDown && card && card.getBaseTrucoPower() >= 11) {
+      el.classList.add('is-bravo-card');
+    }
 
     // Dimensões proporcionais
     const w = Math.round(this.CARD_WIDTH * scale);
