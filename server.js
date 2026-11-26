@@ -1,12 +1,14 @@
 /**
- * server.js - Servidor Estático Leve (Zero Dependências)
- * Suporta implantação no Render como Web Service ou Static Site
+ * server.js - Servidor HTTP Estático + WebSocket Multiplayer 1v1
+ * Suporta implantação no Render como Web Service (mesma porta para HTTP e WS)
  */
 
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { WebSocketServer } from 'ws';
+import { RoomManager } from './src/server/RoomManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,7 +56,25 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🃏 Truco Argentino rodando na porta ${PORT}`);
+// WebSocket Server na mesma porta HTTP
+const wss = new WebSocketServer({ server });
+const roomManager = new RoomManager();
+
+wss.on('connection', (ws) => {
+  roomManager.handleConnection(ws);
 });
 
+// Heartbeat para manter conexões vivas em proxies (ex: Render)
+const heartbeatInterval = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (ws.isAlive === false) return ws.terminate();
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 25000);
+
+wss.on('close', () => clearInterval(heartbeatInterval));
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🃏 Truco Argentino + WebSocket rodando na porta ${PORT}`);
+});

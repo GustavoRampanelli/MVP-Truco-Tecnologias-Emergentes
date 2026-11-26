@@ -1344,3 +1344,125 @@ body {
 .pixel-card.is-bravo-card.card-your-turn {
   animation: bravo-shimmer 1.3s ease-in-out infinite;
 }
+
+/* ============================================================
+   MULTIPLAYER 1v1 LOBBY & BUTTONS
+   ============================================================ */
+.btn-mp {
+  background: linear-gradient(180deg, #2d7dd2 0%, #1c5591 100%);
+  border-color: #74acdf;
+  color: #fff;
+  font-weight: bold;
+}
+
+.btn-mp:hover {
+  background: linear-gradient(180deg, #3b8ee6 0%, #2468af 100%);
+}
+
+.mp-lobby-box {
+  max-width: 460px;
+  width: 92%;
+}
+
+.mp-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.mp-field-group label {
+  font-size: 0.85rem;
+  color: var(--gold-light);
+}
+
+.mp-input {
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid var(--wood-light);
+  border-radius: 4px;
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.mp-input:focus {
+  border-color: var(--celeste-arg);
+}
+
+.mp-code-input {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: bold;
+  text-align: center;
+  width: 120px;
+  font-size: 1.1rem;
+}
+
+.mp-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mp-card-section {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.mp-card-section h4 {
+  margin: 0 0 4px 0;
+  color: var(--gold-light);
+  font-size: 0.95rem;
+}
+
+.mp-divider {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #aaa;
+  font-weight: bold;
+}
+
+.mp-waiting-box {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.45);
+  border: 2px dashed var(--celeste-arg);
+  border-radius: 6px;
+  padding: 16px;
+  margin-top: 10px;
+}
+
+.mp-big-code {
+  font-size: 2.4rem;
+  font-weight: bold;
+  letter-spacing: 0.35em;
+  color: var(--gold-light);
+  text-shadow: 2px 2px #000;
+  margin: 4px 0 8px 0;
+  padding-left: 0.35em;
+}
+
+.mp-waiting-pulse {
+  color: #ddd;
+  font-size: 0.9rem;
+  animation: turn-player-pulse-text 1.4s ease-in-out infinite;
+}
+
+@keyframes turn-player-pulse-text {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+
+.mp-error-msg {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(200, 40, 40, 0.25);
+  border: 1px solid #ef4444;
+  border-radius: 4px;
+  color: #fca5a5;
+  font-size: 0.85rem;
+  text-align: center;
+}

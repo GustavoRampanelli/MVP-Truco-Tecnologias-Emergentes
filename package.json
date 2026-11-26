@@ -8,6 +8,8 @@
     "test": "node test/test_core.js",
     "dev": "vite --port 3000 --open",
     "serve": "python -m http.server 3000"
+  },
+  "dependencies": {
+    "ws": "^8.23.0"
   }
 }
-

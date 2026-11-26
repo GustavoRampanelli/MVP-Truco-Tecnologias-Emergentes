@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Truco Argentino: Deckbuilder de Boteco (PoC)</title>
-  <link rel="stylesheet" href="style.css?v=3d-pov-9">
+  <link rel="stylesheet" href="style.css?v=3d-pov-10">
 </head>
 <body>
   <div id="app-container">
@@ -33,6 +33,9 @@
       <div class="title-actions">
         <button id="btn-start-run" class="pixel-btn btn-primary" style="font-size: 1.1rem; padding: 12px;">
           ▶ Iniciar Nova Run (Ir para a Loja)
+        </button>
+        <button id="btn-open-multiplayer" class="pixel-btn btn-mp" style="font-size: 1.05rem; padding: 11px;">
+          ⚔️ Multiplayer 1v1 (Online)
         </button>
         <button id="btn-open-tutorial" class="pixel-btn" style="font-size: 1rem; border-color: var(--celeste-arg); color: var(--celeste-arg);">
           🎓 Introdução ao Truco Gaudério
@@ -479,6 +482,73 @@
       </button>
     </div>
 
+    <!-- Modal de Lobby Multiplayer 1v1 -->
+    <div id="multiplayer-lobby-modal" class="modal-overlay hidden">
+      <div class="pixel-modal mp-lobby-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="margin: 0;">⚔️ Multiplayer 1v1 Online</h3>
+          <button id="btn-close-mp-x" class="pixel-btn" style="padding: 4px 10px;">✖</button>
+        </div>
+        <p style="font-size: 0.88rem; color: #ddd; margin-bottom: 14px;">
+          Jogue Truco Gaudério (12 tentos) em tempo real contra um colega!
+        </p>
+
+        <div class="mp-field-group">
+          <label for="mp-player-name">Seu Apelido:</label>
+          <input id="mp-player-name" type="text" maxlength="18" placeholder="Ex: Gaúcho" value="Gaúcho" class="mp-input" />
+        </div>
+
+        <div id="mp-actions-area" class="mp-sections">
+          <div class="mp-card-section">
+            <h4>Criar Nova Sala</h4>
+            <p style="font-size: 0.8rem; color: #ccc;">Gere um código de 4 letras e envie o link ao seu colega.</p>
+            <button id="btn-mp-create-room" class="pixel-btn btn-primary" style="width: 100%; margin-top: 8px;">
+              🏠 Criar Sala
+            </button>
+          </div>
+
+          <div class="mp-divider">OU</div>
+
+          <div class="mp-card-section">
+            <h4>Entrar em uma Sala</h4>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <input id="mp-room-code-input" type="text" maxlength="4" placeholder="CÓD." class="mp-input mp-code-input" />
+              <button id="btn-mp-join-room" class="pixel-btn btn-mp" style="white-space: nowrap;">
+                Entrar ➡️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="mp-waiting-box" class="mp-waiting-box hidden">
+          <p style="color: var(--celeste-arg); font-size: 0.9rem; margin-bottom: 6px;">Código da Sala:</p>
+          <div id="mp-room-code-display" class="mp-big-code">----</div>
+          <p class="mp-waiting-pulse">⏳ Aguardando o adversário entrar...</p>
+          <button id="btn-mp-copy-link" class="pixel-btn" style="margin-top: 10px; font-size: 0.85rem;">
+            🔗 Copiar Link de Convite
+          </button>
+        </div>
+
+        <div id="mp-error-msg" class="mp-error-msg hidden"></div>
+
+        <div class="modal-actions" style="margin-top: 16px;">
+          <button id="btn-close-mp-lobby" class="pixel-btn">Voltar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Fim de Partida Multiplayer -->
+    <div id="mp-match-end-modal" class="modal-overlay hidden">
+      <div class="pixel-modal" style="text-align: center; max-width: 420px;">
+        <h3 id="mp-end-title" style="font-size: 1.5rem; margin-bottom: 10px;">🏆 VITÓRIA!</h3>
+        <p id="mp-end-subtitle" style="color: #ddd; margin-bottom: 20px;">Placar final: 12 x 8</p>
+        <div class="modal-actions" style="justify-content: center; gap: 10px;">
+          <button id="btn-mp-rematch" class="pixel-btn btn-primary">🔄 Revanche</button>
+          <button id="btn-mp-exit-menu" class="pixel-btn">🏠 Menu Principal</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Container de Toasts Flutuantes -->
     <div id="toast-container"></div>
 
@@ -486,7 +556,7 @@
     <canvas id="particle-canvas"></canvas>
   </div>
 
-  <script type="module" src="src/main.js?v=3d-pov-9"></script>
+  <script type="module" src="src/main.js?v=3d-pov-10"></script>
 </body>
 </html>
 

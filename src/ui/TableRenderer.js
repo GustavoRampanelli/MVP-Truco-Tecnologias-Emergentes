@@ -2,6 +2,7 @@
  * TableRenderer.js - Controlador e Renderizador da Mesa de Partida de Truco
  */
 
+import { Card, SUITS } from '../core/Card.js';
 import { TrucoEngine, BET_LEVELS } from '../core/TrucoEngine.js';
 import { EnvidoEngine } from '../core/EnvidoEngine.js';
 import { OpponentAI } from '../core/OpponentAI.js';
@@ -33,12 +34,15 @@ export class TableRenderer {
 
     this.showHints = true;
     this.ai = null;
+    this.isMultiplayer = false;
+    this.mpOpponentName = 'Adversário';
   }
 
   /**
    * Inicia uma nova partida contra o adversário atual do Boteco
    */
   startMatch() {
+    this.isMultiplayer = false;
     const opp = this.runManager.getCurrentOpponent();
     this.ai = new OpponentAI(opp.personality);
 
@@ -326,7 +330,7 @@ export class TableRenderer {
       el.textContent = '🫵 SUA VEZ — jogue uma carta';
       el.className = 'turn-indicator turn-player';
     } else {
-      const oppName = this.ai ? this.ai.name : 'Adversário';
+      const oppName = this.isMultiplayer ? this.mpOpponentName : (this.ai ? this.ai.name : 'Adversário');
       el.textContent = `⏳ Aguardando ${oppName}...`;
       el.className = 'turn-indicator turn-opponent';
     }
@@ -386,6 +390,14 @@ export class TableRenderer {
     if (!this.currentHand.isPlayerTurn || this.currentHand.awaitingBetResponse) return;
     const engine = this.currentHand.trucoEngine;
     if (engine.handFinished) return;
+
+    if (this.isMultiplayer) {
+      this.sound.playCardSlide();
+      this.currentHand.isPlayerTurn = false;
+      this.updateControls();
+      this.app.mpClient.playCard(card.id);
+      return;
+    }
 
     // Remover da mão do jogador
     this.currentHand.playerHand.splice(index, 1);
@@ -577,6 +589,12 @@ export class TableRenderer {
 
   // --- TRUCO INTERACTIONS ---
   playerProposeTruco(betType) {
+    if (this.isMultiplayer) {
+      this.sound.playTrucoCall();
+      this.app.mpClient.proposeTruco(betType);
+      return;
+    }
+
     const engine = this.currentHand.trucoEngine;
     if (!engine.proposeBet('PLAYER', betType)) return;
 
@@ -638,7 +656,8 @@ export class TableRenderer {
     const raiseBtn = document.getElementById('btn-modal-raise');
 
     if (!modal) return;
-    title.textContent = `${this.ai.name} gritou ${BET_LEVELS[betType].name}! O que você faz?`;
+    const oppName = this.isMultiplayer ? this.mpOpponentName : this.ai.name;
+    title.textContent = `${oppName} gritou ${BET_LEVELS[betType].name}! O que você faz?`;
 
     // Botão de aumentar (Retruco / Vale Cuatro)
     const nextBet = BET_LEVELS[betType].nextBet;
@@ -647,6 +666,11 @@ export class TableRenderer {
       raiseBtn.textContent = BET_LEVELS[nextBet].name;
       raiseBtn.onclick = () => {
         modal.classList.add('hidden');
+        if (this.isMultiplayer) {
+          this.sound.playTrucoCall();
+          this.app.mpClient.respondTruco(nextBet);
+          return;
+        }
         this.playerProposeTruco(nextBet);
       };
     } else {
@@ -655,6 +679,11 @@ export class TableRenderer {
 
     quieroBtn.onclick = () => {
       modal.classList.add('hidden');
+      if (this.isMultiplayer) {
+        this.sound.playClick();
+        this.app.mpClient.respondTruco('QUIERO');
+        return;
+      }
       this.currentHand.trucoEngine.acceptBet('PLAYER');
       Dialogs.showToast(`Você aceitou: <b>¡QUIERO!</b>`, 'info');
       this.currentHand.awaitingBetResponse = false;
@@ -666,6 +695,11 @@ export class TableRenderer {
 
     noQuieroBtn.onclick = () => {
       modal.classList.add('hidden');
+      if (this.isMultiplayer) {
+        this.sound.playClick();
+        this.app.mpClient.respondTruco('NO_QUIERO');
+        return;
+      }
       this.currentHand.trucoEngine.declineBet('PLAYER');
       this.currentHand.awaitingBetResponse = false;
       this.resolveHandEnd();
@@ -676,6 +710,13 @@ export class TableRenderer {
 
   // --- ENVIDO INTERACTIONS ---
   playerCallEnvido(type = 'ENVIDO') {
+    if (this.isMultiplayer) {
+      this.sound.playClick();
+      Dialogs.showToast(`Você cantou <b>${type}</b>!`, 'info');
+      this.app.mpClient.proposeEnvido(type);
+      return;
+    }
+
     this.sound.playClick();
     Dialogs.showToast(`Você cantou <b>${type}</b>!`, 'info');
     this.currentHand.awaitingBetResponse = true;
@@ -758,6 +799,10 @@ export class TableRenderer {
 
   handlePlayerFold() {
     this.sound.playClick();
+    if (this.isMultiplayer) {
+      this.app.mpClient.fold();
+      return;
+    }
     this.currentHand.trucoEngine.fold('PLAYER');
     this.resolveHandEnd();
   }
@@ -784,6 +829,221 @@ export class TableRenderer {
     } else {
       this.app.showDefeatModal(res.livesLeft);
     }
+  }
+
+  // =====================================================================
+  // MULTIPLAYER 1v1 ONLINE (CLIENT SYNC)
+  // =====================================================================
+
+  startMultiplayerMatch(opponentName, pointsToWin = 12) {
+    this.isMultiplayer = true;
+    this.mpOpponentName = opponentName || 'Adversário';
+    this.ai = null;
+
+    this.matchState.playerScore = 0;
+    this.matchState.opponentScore = 0;
+    this.matchState.pointsToWin = pointsToWin;
+    this.matchState.isPlayerMano = true;
+    this.matchState.handCount = 0;
+
+    const barEl = document.getElementById('bar-title');
+    if (barEl) barEl.textContent = '⚔️ Duelo 1v1 Online';
+
+    const oppNameEl = document.getElementById('opponent-name');
+    if (oppNameEl) oppNameEl.textContent = this.mpOpponentName;
+
+    const oppRoleEl = document.getElementById('opponent-role');
+    if (oppRoleEl) oppRoleEl.textContent = 'Jogador Online';
+
+    const oppImgEl = document.getElementById('opponent-character-img');
+    if (oppImgEl) {
+      oppImgEl.src = 'assets/opponent_in_scene_clean.png';
+      oppImgEl.alt = this.mpOpponentName;
+    }
+
+    const coinsEl = document.getElementById('player-coins-val');
+    if (coinsEl) coinsEl.textContent = '—';
+
+    const livesEl = document.getElementById('player-lives-val');
+    if (livesEl) livesEl.textContent = '1v1';
+
+    const jokersEl = document.getElementById('equipped-jokers-list');
+    if (jokersEl) {
+      jokersEl.innerHTML = '<span class="no-jokers-text">Modo Clássico 1v1 (Sem Curingas)</span>';
+    }
+
+    this.renderScoreboard();
+  }
+
+  hydrateCard(c) {
+    if (!c) return null;
+    return new Card(c.value, SUITS[c.suitId]);
+  }
+
+  applyMultiplayerState(state, event = null) {
+    this.matchState.playerScore = state.playerScore;
+    this.matchState.opponentScore = state.opponentScore;
+    this.matchState.pointsToWin = state.pointsToWin;
+    this.matchState.isPlayerMano = state.isPlayerMano;
+    this.matchState.handCount = state.handCount;
+
+    const engine = new TrucoEngine(state.isPlayerMano, {});
+    engine.currentTrick = state.currentTrick;
+    engine.tricks = state.tricks.map(t => ({
+      playerCard: this.hydrateCard(t.playerCard),
+      opponentCard: this.hydrateCard(t.opponentCard),
+      winner: t.winner
+    }));
+    engine.currentBet = BET_LEVELS[state.currentBetKey] || BET_LEVELS.NONE;
+    engine.lastBettor = state.lastBettor;
+    engine.betPending = state.betPending;
+    engine.handFinished = state.handFinished;
+    engine.handWinner = state.handWinner;
+    engine.pointsAwarded = state.pointsAwarded;
+
+    this.currentHand = {
+      playerHand: state.playerHand.map(c => this.hydrateCard(c)),
+      opponentHand: new Array(state.opponentCardCount).fill(null),
+      trucoEngine: engine,
+      envidoResolved: state.envidoResolved,
+      isPlayerTurn: state.isPlayerTurn,
+      awaitingBetResponse: state.awaitingBetResponse
+    };
+
+    this.renderScoreboard();
+    this.renderTableCards();
+    this.updateControls();
+
+    // Feedbacks & Partículas
+    if (event) {
+      if (event.fx === 'hand_started') {
+        this.sound.playCardSlide();
+        document.getElementById('bet-response-modal')?.classList.add('hidden');
+        document.getElementById('envido-response-modal')?.classList.add('hidden');
+        if (event.toast) Dialogs.showToast(event.toast, 'info', 2000);
+      } else if (event.fx === 'card_played' || event.fx === 'trick_resolved') {
+        this.sound.playCardSlide();
+        const trickSlots = document.querySelectorAll('#table-tricks-area .trick-slot');
+        const targetSlot = trickSlots[event.trickIdx];
+        const selector = event.playedBy === 'PLAYER' ? '.trick-cards-flex > :last-child' : '.trick-cards-flex > :first-child';
+        const playedEl = targetSlot?.querySelector(selector);
+        this.app.particles?.burstCardPlay(playedEl || targetSlot, !!event.isBravo);
+
+        if (event.trickWinner === 'PLAYER') {
+          this.sound.playTrickWon();
+          this.app.particles?.burstVictory('trick');
+          Dialogs.showToast('Você levou a vaza!', 'success', 1400);
+        } else if (event.trickWinner === 'OPPONENT') {
+          this.sound.playTrickLost();
+          Dialogs.showToast(`${this.mpOpponentName} levou a vaza.`, 'warning', 1400);
+        } else if (event.trickWinner === 'TIE') {
+          Dialogs.showToast('<b>Parda!</b> Vaza empatada.', 'info', 1500);
+        }
+      } else if (event.fx === 'truco_call') {
+        this.sound.playTrucoCall();
+        this.app.particles?.burstTruco(event.betType);
+        Dialogs.triggerScreenShake();
+        if (event.from === 'OPPONENT' && event.speech) {
+          Dialogs.showOpponentSpeech(event.speech);
+        }
+      } else if (event.fx === 'truco_accepted') {
+        this.sound.playClick();
+        if (event.from === 'OPPONENT') {
+          Dialogs.showOpponentSpeech(event.speech || '¡QUIERO!');
+        }
+        Dialogs.showToast(`Truco aceito!`, 'info', 1600);
+      } else if (event.fx === 'truco_declined' || event.fx === 'fold') {
+        if (event.from === 'OPPONENT' && event.speech) {
+          Dialogs.showOpponentSpeech(event.speech);
+        }
+      } else if (event.fx === 'envido_call') {
+        this.sound.playClick();
+        if (event.from === 'OPPONENT') {
+          Dialogs.showOpponentSpeech(event.speech || `¡${event.envidoType}!`);
+        }
+      } else if (event.fx === 'envido_resolved') {
+        if (event.winner === 'PLAYER') {
+          this.sound.playTrickWon();
+          this.app.particles?.burstVictory('trick');
+          const detail = event.myEnvidoPoints !== undefined
+            ? ` (${event.myEnvidoPoints} vs ${event.oppEnvidoPoints})`
+            : '';
+          Dialogs.showToast(`<b>Envido ganho!</b>${detail} (+${event.points} tento(s))`, 'success', 2800);
+        } else {
+          this.sound.playTrickLost();
+          const detail = event.myEnvidoPoints !== undefined
+            ? ` (${event.oppEnvidoPoints} vs ${event.myEnvidoPoints})`
+            : '';
+          Dialogs.showToast(`${this.mpOpponentName} venceu o Envido${detail} (+${event.points} tento(s)).`, 'warning', 2800);
+        }
+      }
+
+      if (event.handWinner) {
+        if (event.handWinner === 'PLAYER') {
+          this.sound.playTrickWon();
+          this.app.particles?.burstVictory('hand');
+          Dialogs.showToast(`<b>¡MÃO GANHA!</b> Você somou +${event.handPoints} tento(s)!`, 'success', 2600);
+        } else {
+          this.sound.playTrickLost();
+          Dialogs.showToast(`${this.mpOpponentName} ganhou a mão (+${event.handPoints} tento(s)).`, 'warning', 2600);
+        }
+      }
+    }
+
+    // Modais de resposta pendentes
+    if (state.betPending && state.betPending.from === 'OPPONENT') {
+      this.showBetResponseModal('OPPONENT', state.betPending.type);
+    } else {
+      document.getElementById('bet-response-modal')?.classList.add('hidden');
+    }
+
+    if (state.envidoPending && state.envidoPending.from === 'OPPONENT') {
+      this.showMpEnvidoModal(state.envidoPending.type);
+    } else {
+      document.getElementById('envido-response-modal')?.classList.add('hidden');
+    }
+
+    // Fim de partida
+    if (state.matchFinished) {
+      const endModal = document.getElementById('mp-match-end-modal');
+      const endTitle = document.getElementById('mp-end-title');
+      const endSub = document.getElementById('mp-end-subtitle');
+      const won = state.matchWinner === 'PLAYER';
+
+      if (won) {
+        this.sound.playMatchVictory();
+        this.app.particles?.burstVictory('match');
+        if (endTitle) endTitle.textContent = '🏆 VOCÊ VENCEU!';
+      } else {
+        this.sound.playGameOver();
+        if (endTitle) endTitle.textContent = '💀 DERROTA!';
+      }
+
+      if (endSub) {
+        endSub.textContent = `Placar Final: Você ${state.playerScore} x ${state.opponentScore} ${this.mpOpponentName}`;
+      }
+      endModal?.classList.remove('hidden');
+    }
+  }
+
+  showMpEnvidoModal(envidoType) {
+    const modal = document.getElementById('envido-response-modal');
+    if (!modal) return;
+    document.getElementById('envido-modal-title').textContent = `${this.mpOpponentName} cantou ${envidoType}!`;
+
+    document.getElementById('btn-envido-quiero').onclick = () => {
+      modal.classList.add('hidden');
+      this.sound.playClick();
+      this.app.mpClient.respondEnvido('QUIERO');
+    };
+
+    document.getElementById('btn-envido-noquiero').onclick = () => {
+      modal.classList.add('hidden');
+      this.sound.playClick();
+      this.app.mpClient.respondEnvido('NO_QUIERO');
+    };
+
+    modal.classList.remove('hidden');
   }
 }
 
