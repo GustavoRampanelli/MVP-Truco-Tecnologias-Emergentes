@@ -70,6 +70,12 @@ assert(seis.getBaseTrucoPower() === 3, '6 tem força 3');
 assert(cinco.getBaseTrucoPower() === 2, '5 tem força 2');
 assert(quatro.getBaseTrucoPower() === 1, '4 tem força 1 (mais fraca)');
 
+// Garantir que nenhuma carta válida aponte para as colunas de 8 (col 6) ou 9 (col 7) da sprite
+const allDeckCards = new Deck().cards;
+const hasSprite8or9 = allDeckCards.some(c => c.col === 6 || c.col === 7);
+assert(!hasSprite8or9, 'Nenhuma carta do baralho aponta para colunas visuais 8 ou 9 da sprite');
+assert(macho.col === 12 && sieteBravo.col === 5 && sota.col === 8 && caballo.col === 9 && rey.col === 11, 'Mapeamento visual da sprite está correto (1->12, 7->5, 10->8, 11->9, 12->11)');
+
 console.log('\n--- Testando 2. Baralho Espanhol (Deck) ---');
 const deck = new Deck();
 assert(deck.size() === 40, 'Baralho inicial tem exatamente 40 cartas');

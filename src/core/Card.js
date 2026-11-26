@@ -14,6 +14,21 @@ export const SUIT_LIST = [SUITS.BASTOS, SUITS.COPAS, SUITS.OROS, SUITS.ESPADAS];
 
 export const VALID_CARD_VALUES = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12];
 
+// Mapeamento exato das colunas na sprite sheet 8BitDeck_BaralhoEspanhol.png
+// (col 0..5 = 2..7 | col 6..7 = 8..9 ignorados | col 8 = 10 | col 9 = J(11) | col 11 = K(12) | col 12 = Ás(1))
+const SPRITE_COL_MAP = {
+  1: 12,
+  2: 0,
+  3: 1,
+  4: 2,
+  5: 3,
+  6: 4,
+  7: 5,
+  10: 8,
+  11: 9,
+  12: 11
+};
+
 export class Card {
   /**
    * @param {number} value - 1 a 12 (exceto 8 e 9)
@@ -32,7 +47,7 @@ export class Card {
     this.modifiers = { ...modifiers };
 
     // Coordenadas na Sprite Sheet (142 x 190)
-    this.col = value - 1; // 1 -> col 0, ..., 12 -> col 11
+    this.col = SPRITE_COL_MAP[value];
     this.row = suit.row;
   }
 

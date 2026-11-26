@@ -362,6 +362,7 @@ export class TableRenderer {
     if (florBtn) {
       const { isFlor } = EnvidoEngine.calculateHandEnvido(this.currentHand.playerHand);
       florBtn.style.display = isFlor && engine.currentTrick === 0 && !this.currentHand.envidoResolved ? 'inline-block' : 'none';
+      florBtn.disabled = !this.currentHand.isPlayerTurn;
     }
 
     // Truco: depende do nível atual
@@ -877,7 +878,7 @@ export class TableRenderer {
 
   hydrateCard(c) {
     if (!c) return null;
-    return new Card(c.value, SUITS[c.suitId]);
+    return new Card(c.value, SUITS[c.suitId], c.id);
   }
 
   applyMultiplayerState(state, event = null) {
